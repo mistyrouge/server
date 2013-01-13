@@ -63,7 +63,7 @@ dd bs=4M if="/dev/optiplex/template" of="/dev/optiplex/$NAME"
 
 # resizing the / partition to fit hte disk
 echo "3/$TOTAL_STATE - Fixing partition size"
-e2fsck -f /dev/optiplex/$NAME #This one is likely to have a non null return 
+e2fsck -fy /dev/optiplex/$NAME #This one is likely to have a non null return 
 resize2fs /dev/optiplex/$NAME
                                                                                 if [ $? != 0 ]; then exit 1; fi
 

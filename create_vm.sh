@@ -93,8 +93,8 @@ name = "$NAME"
 
 memory = 256
 
-disk = ['phy:/dev/optiplex/'$NAME'-virt,xvda,w','phy:/dev/optiplex/'$NAME',xvdb,w']
-vif = [' ']
+disk = ["phy:/dev/optiplex/$NAME-virt,xvda,w","phy:/dev/optiplex/$NAME,xvdb,w"]
+vif = [" "]
 
 bootloader = "pygrub"
 EOF

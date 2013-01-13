@@ -88,8 +88,16 @@ rm -r $TEMP
 
 # creating configuration file
 echo "7/$TOTAL_STATE - Creating new configuration file"
-cp -a $CONFIG_PATH/template.cfg.example $CONFIG_PATH/$NAME.cfg
-sed -i 's/template/$NAME/' $CONFIG_PATH/$NAME.cfg
+cat >> $CONFIG_PATH/$NAME.cfg << EOF
+name = "$NAME"
+
+memory = 256
+
+disk = ['phy:/dev/optiplex/'$NAME'-virt,xvda,w','phy:/dev/optiplex/'$NAME',xvdb,w']
+vif = [' ']
+
+bootloader = "pygrub"
+EOF
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
 #starting the new VM

@@ -49,7 +49,8 @@ esac;
 
 # creating new VM disks
 echo "1/$TOTAL_STATE - Creating new logical volumes for the VM"
-lvcreate -L $SIZE -n $NAME optiplex
+lvcreatme -L $SIZE -n $NAME optiplex
+if [ $? != 0 ]; then exit $?; fi
 lvcreate -L 4G -n $NAME-virt optiplex
 
 # copying operating system data form template

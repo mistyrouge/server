@@ -11,8 +11,8 @@ OPTIONS:
 EOF
 }
 
-NAME=
-SIZE=
+NAME="undefined"
+SIZE="undefined"
 CONFIG_PATH="/home/dorian/vm_config"
 TOTAL_STATE="8"
 while getopts “h:n:s” OPTION
@@ -34,6 +34,20 @@ do
              ;;
      esac
 done
+
+case "undefined" in
+	$NAME)
+		echo "You need a name for the new VM"
+		exit 1;
+		;;
+	$SIZE)
+		echo "You need a name for the new VM"
+		exit 1;
+		;;
+esac;
+
+echo "halt"
+exit 1
 
 # creating new VM disks
 echo "1/$TOTAL_STATE - Creating new logical volumes for the VM"

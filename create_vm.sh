@@ -88,7 +88,7 @@ rm -r $TEMP
 
 # creating configuration file
 echo "7/$TOTAL_STATE - Creating new configuration file"
-cat >> $CONFIG_PATH/$NAME.cfg << EOF
+cat >> $CONFIG_PATH/$NAME.cfg < EOF
 name = "$NAME"
 
 memory = 256

@@ -50,52 +50,51 @@ esac;
 # creating new VM disks
 echo "1/$TOTAL_STATE - Creating new logical volumes for the VM"
 lvcreate -L $SIZE -n $NAME optiplex
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 lvcreate -L 4G -n $NAME-virt optiplex
 if [ $? != 0 ]; then exit 1; fi
 
 # copying operating system data form template
 echo "2/$TOTAL_STATE - Copying operating system files. This may take some times."
 dd bs=4M if="/dev/optiplex/template-virt" of="/dev/optiplex/$NAME-virt"
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 dd bs=4M if="/dev/optiplex/template" of="/dev/optiplex/$NAME"
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 # resizing the / partition to fit hte disk
 echo "3/$TOTAL_STATE - Fixing partition size"
-e2fsck -f /dev/optiplex/$NAME
-if [ $? != 0 ]; then exit 1; fi
+e2fsck -f /dev/optiplex/$NAME #This one is likely to have a non null return 
 resize2fs /dev/optiplex/$NAME
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 # mount the new filesystem to apply some changes
 echo "4/$TOTAL_STATE - Opening new VM's filesystem"
 TEMP=`mktemp -d`
 mount /dev/optiplex/$NAME $TEMP
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 # Update the new VM's hostname
 echo "5/$TOTAL_STATE - Updating hostname information"
 sed -i 's/template/$NAME/' $TEMP/etc/hostname
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 sed -i 's/template/$NAME/' $TEMP/etc/hosts
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 # unmount the filesystem and remove temp directory
 echo "6/$TOTAL_STATE - Unmounting new filesystem"
 umount $TEMP
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 rm -r $TEMP
 
 # creating configuration file
 echo "7/$TOTAL_STATE - Creating new configuration file"
 cp -a $CONFIG_PATH/template.cfg.example $CONFIG_PATH/$NAME.cfg
 sed -i 's/template/$NAME/' $CONFIG_PATH/$NAME.cfg
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 #starting the new VM
 echo "8/$TOTAL_STATE - Starting new VM"
 xm create $CONFIG_PATH/$NAME.cfg
-if [ $? != 0 ]; then exit 1; fi
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
 echo "--- THE END ---"

@@ -41,13 +41,11 @@ case "undefined" in
 		exit 1;
 		;;
 	$SIZE)
-		echo "You need a name for the new VM"
+		echo "You need a size for the new VM"
 		exit 1;
 		;;
 esac;
 
-echo "halt"
-exit 1
 
 # creating new VM disks
 echo "1/$TOTAL_STATE - Creating new logical volumes for the VM"

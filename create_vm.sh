@@ -15,7 +15,7 @@ NAME="undefined"
 SIZE="undefined"
 CONFIG_PATH="/home/dorian/vm_config"
 TOTAL_STATE="8"
-while getopts “h:n:s” OPTION
+while getopts “hn:s:” OPTION
 do
 	case $OPTION in
          h)

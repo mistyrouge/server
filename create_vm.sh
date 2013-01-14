@@ -14,7 +14,8 @@ EOF
 NAME="undefined"
 SIZE="undefined"
 CONFIG_PATH="/home/dorian/vm_config"
-TOTAL_STATE="8"
+TOT_STATE=14
+CUR_STATE=1
 while getopts “hn:s:” OPTION
 do
 	case $OPTION in
@@ -47,62 +48,85 @@ case "undefined" in
 esac;
 
 
-# creating new VM disks
-echo "1/$TOTAL_STATE - Creating new logical volumes for the VM"
+echo "$CUR_STATE/$TOT_STATE - Creating a new logical volume for the VM"
 lvcreate -L $SIZE -n $NAME optiplex
-                                                                                if [ $? != 0 ]; then exit 1; fi
-lvcreate -L 4G -n $NAME-virt optiplex
-if [ $? != 0 ]; then exit 1; fi
-
-# copying operating system data form template
-echo "2/$TOTAL_STATE - Copying operating system files. This may take some times."
-dd bs=4M if="/dev/optiplex/template-virt" of="/dev/optiplex/$NAME-virt"
-                                                                                if [ $? != 0 ]; then exit 1; fi
-dd bs=4M if="/dev/optiplex/template" of="/dev/optiplex/$NAME"
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-# resizing the / partition to fit hte disk
-echo "3/$TOTAL_STATE - Fixing partition size"
-e2fsck -fy /dev/optiplex/$NAME #This one is likely to have a non null return 
-resize2fs /dev/optiplex/$NAME
+echo "$CUR_STATE/$TOT_STATE - Creating a partition table on the new LV"
+parted /dev/optiplex/$NAME mktable msdos
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-# mount the new filesystem to apply some changes
-echo "4/$TOTAL_STATE - Opening new VM's filesystem"
+echo "$CUR_STATE/$TOT_STATE - Creating a swap partition"
+parted /dev/optiplex/$NAME mkpartfs primary linux-swap 1 4G
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Creating a ext4 partition for /"
+parted /dev/optiplex/$NAME mkpartfs primary ext4 4G -1
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Open LV"
+kpartx /dev/optiplex/template
+kpartx /dev/optiplex/$NAME
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Import template / into the new /"
+dd bs=4M if=/dev/mapper/optiplex-template2 of=/dev/mapper/optiplex-$NAME2
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Fixing new / filesystem"
+e2fsck -f /dev/mapper/optiplex-$NAME2
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Growing new / filesystem"
+resize2fs /dev/mapper/optiplex-$NAME2
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Mounting new filesystem"
 TEMP=`mktemp -d`
 mount /dev/optiplex/$NAME $TEMP
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-# Update the new VM's hostname
-echo "5/$TOTAL_STATE - Updating hostname information"
+echo "$CUR_STATE/$TOT_STATE - Updating hostname information"
 sed -i 's/template/$NAME/' $TEMP/etc/hostname
-                                                                                if [ $? != 0 ]; then exit 1; fi
 sed -i 's/template/$NAME/' $TEMP/etc/hosts
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-# unmount the filesystem and remove temp directory
-echo "6/$TOTAL_STATE - Unmounting new filesystem"
+echo "$CUR_STATE/$TOT_STATE - Unmounting new filesystem"
 umount $TEMP
-                                                                                if [ $? != 0 ]; then exit 1; fi
 rm -r $TEMP
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
 
-# creating configuration file
-echo "7/$TOTAL_STATE - Creating new configuration file"
+echo "$CUR_STATE/$TOT_STATE - Close LV"
+kpartx -d /dev/optiplex/template
+kpartx -d /dev/optiplex/$NAME
+                                                                                CUR_STATE=$CUR_STATE+1
+                                                                                if [ $? != 0 ]; then exit 1; fi
+
+echo "$CUR_STATE/$TOT_STATE - Creating new configuration file"
 cat >> $CONFIG_PATH/$NAME.cfg < EOF
 name = "$NAME"
-
 memory = 256
-
-disk = ["phy:/dev/optiplex/$NAME-virt,xvda,w","phy:/dev/optiplex/$NAME,xvdb,w"]
+disk = ["phy:/dev/optiplex/$NAME,xvda,w"]
 vif = [" "]
-
 bootloader = "pygrub"
 EOF
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-#starting the new VM
-echo "8/$TOTAL_STATE - Starting new VM"
+echo "$CUR_STATE/$TOT_STATE - Starting the new VM"
 xm create $CONFIG_PATH/$NAME.cfg
+                                                                                CUR_STATE=$CUR_STATE+1
                                                                                 if [ $? != 0 ]; then exit 1; fi
 
-echo "--- THE END ---"
+echo "--- The END ---"

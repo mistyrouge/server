@@ -59,48 +59,48 @@ function next(){
 
 echo "$CUR_STATE/$TOT_STATE - Creating a new logical volume for the VM"
 lvcreate -L $SIZE -n $NAME $VG
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Creating a partition table on the new LV"
 parted /dev/$VG/$NAME mktable msdos
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Creating a swap partition"
 parted /dev/$VG/$NAME mkpartfs primary linux-swap 1 4G
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Creating a ext4 partition for /"
 parted /dev/$VG/$NAME mkpartfs primary ext2 4G 100%
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Open LV"
 kpartx -a /dev/$VG/template
 kpartx -a /dev/$VG/$NAME
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Import template / into the new /"
 dd bs=4M if="/dev/mapper/"$VG"-template2" of="/dev/mapper/"$VG"-"$NAME"2"
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Fixing new / filesystem"
 e2fsck -fy "/dev/mapper/"$VG"-"$NAME"2"
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Growing new / filesystem"
 resize2fs "/dev/mapper/"$VG"-"$NAME"2"
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Mounting new filesystem"
 TEMP=`mktemp -d`
 mount "/dev/mapper/"$VG"-"$NAME"2" $TEMP
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Updating hostname information"
 sed -i 's/template/'$NAME'/' $TEMP/etc/hostname
 sed -i 's/template/'$NAME'/' $TEMP/etc/hosts
 sed -i 's/template/'$NAME'/' $TEMP/etc/hosts
 # did it twice because template appear twice on a single line
-next($?)
+next $?
 
 #
 # find an ipv4 if non provided
@@ -119,17 +119,17 @@ next($?)
 #    dns-nameservers 8.8.8.8 8.8.4.4
 #…
 #EOF
-#next($?)
+#next $?
 
 echo "$CUR_STATE/$TOT_STATE - Unmounting new filesystem"
 umount $TEMP
 rm -r $TEMP
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Close LV"
 kpartx -d /dev/$VG/template
 kpartx -d /dev/$VG/$NAME
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Creating new configuration file"
 echo "" > $CONFIG_PATH/$NAME.cfg
@@ -140,10 +140,10 @@ disk = ["phy:/dev/$VG/$NAME,xvda,w"]
 vif = [" "]
 bootloader = "pygrub"
 EOF
-next($?)
+next $?
 
 echo "$CUR_STATE/$TOT_STATE - Starting the new VM"
 xm create $CONFIG_PATH/$NAME.cfg
-next($?)
+next $?
 
 echo "--- The END ---"

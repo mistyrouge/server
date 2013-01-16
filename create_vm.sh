@@ -102,6 +102,25 @@ sed -i 's/template/'$NAME'/' $TEMP/etc/hosts
 # did it twice because template appear twice on a single line
 next($?)
 
+#
+# find an ipv4 if non provided
+# local loop configuration
+# ipv6 configuration
+#
+#echo "$CUR_STATE/$TOT_STATE - Configure the network"
+#echo "" > /etc/network/interfaces
+#cat >> /etc/network/interfaces << EOF
+#…
+#auto inet eth0
+#iface eth0 static
+#    address $IP 
+#    netmask 255.255.255.0
+#    gateway 192.168.0.254
+#    dns-nameservers 8.8.8.8 8.8.4.4
+#…
+#EOF
+#next($?)
+
 echo "$CUR_STATE/$TOT_STATE - Unmounting new filesystem"
 umount $TEMP
 rm -r $TEMP

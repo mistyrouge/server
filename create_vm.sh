@@ -52,9 +52,9 @@ case "undefined" in
 		;;
 esac;
 
-next(STATUS){
+function next(){
     let CUR_STATE=$CUR_STATE+1
-    if [ $STATUS != 0 ]; then exit 1; fi
+    if [ $1 != 0 ]; then exit 1; fi
 }
 
 echo "$CUR_STATE/$TOT_STATE - Creating a new logical volume for the VM"

@@ -1,8 +1,10 @@
 #!/bin/bash
 
+# TODO : automatically install openssh-server
+
 usage(){
 cat << EOF
-usage : $0 -n NAME -s SIZE [-h] [-v VOLUME_GROUP]
+usage : $0 -n NAME -s SIZE [-h] [-v VOLUME_GROUP] [-i IP_ADDRESS]
 
 OPTIONS:
 	-n	name of the new virtual machine
@@ -39,9 +41,9 @@ do
             IP=$OPTARG
             ;;
         ?)
-        usage
-        exit
-;;
+            echo "Unknown option "$OPTION
+            exit
+            ;;
      esac
 done
 

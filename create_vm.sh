@@ -60,7 +60,20 @@ esac;
 
 function next(){
     let CUR_STATE=$CUR_STATE+1
-    if [ $1 != 0 ]; then exit 1; fi
+    if [ $1 != 0 ]
+    then
+        # something went wrong, clean up the mess and exit
+        if [ $TEMP ]
+        then
+            umount $TEMP
+            rm -r $TEMP
+        fi
+        kpartx -d /dev/$VG/template
+        kpartx -d /dev/$VG/$NAME
+        
+        ./destroy_VM $NAME 
+        exit 1
+    fi
 }
 
 echo "$CUR_STATE/$TOT_STATE - Creating a new logical volume for the VM"

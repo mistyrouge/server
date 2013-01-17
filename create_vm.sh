@@ -7,8 +7,9 @@ usage : $0 -n NAME -s SIZE [-h] [-v VOLUME_GROUP]
 OPTIONS:
 	-n	name of the new virtual machine
 	-s	size of the / partition on the new virtual machine (>=2G)
-	-h	print this help
     -v  LVM Volume group to use
+    -i  ip address of the new VM
+    -h  print this help
 EOF
 }
 
@@ -21,23 +22,26 @@ CUR_STATE=1
 while getopts “hn:s:” OPTION
 do
 	case $OPTION in
-         h)
-             usage
-             exit 1
-             ;;
-         n)
-             NAME=$OPTARG
-             ;;
-         s)
-             SIZE=$OPTARG
-             ;;
-         v)
-             VG=$OPTARG
-             ;;
-         ?)
-             usage
-             exit
-             ;;
+        h)
+            usage
+            exit 1
+            ;;
+        n)
+            NAME=$OPTARG
+            ;;
+        s)
+            SIZE=$OPTARG
+            ;;
+        v)
+            VG=$OPTARG
+            ;;
+        i)
+            IP=$OPTARG
+            ;;
+        ?)
+        usage
+        exit
+;;
      esac
 done
 
@@ -108,19 +112,32 @@ next $?
 # local loop configuration
 # ipv6 configuration
 #
-#echo "$CUR_STATE/$TOT_STATE - Configure the network"
-#echo "" > /etc/network/interfaces
-#cat >> /etc/network/interfaces << EOF
-#…
-#auto inet eth0
-#iface eth0 static
-#    address $IP 
-#    netmask 255.255.255.0
-#    gateway 192.168.0.254
-#    dns-nameservers 8.8.8.8 8.8.4.4
-#…
-#EOF
-#next $?
+echo "$CUR_STATE/$TOT_STATE - Configure the network"
+if [ $IP ]
+then
+    # write the configuration
+    echo "" > /etc/network/interfaces
+    cat >> /etc/network/interfaces << EOF
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+
+    # The primary network interface
+    auto eth0
+    iface eth0 inet static
+        address $IP 
+        netmask 255.255.255.0
+        gateway 192.168.0.254
+        dns-nameservers 8.8.8.8 8.8.4.4
+
+    # This is an autoconfigured IPv6 interface
+    iface eth0 inet6 auto
+    EOF
+    next $?
+else
+    [ 1 ] # do nothing
+    next $?
+fi
 
 echo "$CUR_STATE/$TOT_STATE - Unmounting new filesystem"
 umount $TEMP

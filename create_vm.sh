@@ -21,7 +21,7 @@ CONFIG_PATH="/home/dorian/vm_config"
 VG="optiplex"
 TOT_STATE=14
 CUR_STATE=1
-while getopts “hn:s:” OPTION
+while getopts “hn:s:i:” OPTION
 do
 	case $OPTION in
         h)

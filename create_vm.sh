@@ -84,6 +84,7 @@ next $?
 
 echo "$CUR_STATE/$TOT_STATE - Fixing new / filesystem"
 e2fsck -fy "/dev/mapper/"$VG"-"$NAME"2"
+[ 1 ] # the previous funciton can return a non-0 zero return code
 next $?
 
 echo "$CUR_STATE/$TOT_STATE - Growing new / filesystem"

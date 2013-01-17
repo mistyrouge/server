@@ -16,7 +16,7 @@ TOT_STATE=3
 
 if [ $NAME ]
 then
-    # nothing
+    [ 1 ] # do nothing
 else
     usage
     exit 1

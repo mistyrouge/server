@@ -19,7 +19,7 @@ NAME="undefined"
 SIZE="undefined"
 CONFIG_PATH="/home/dorian/vm_config"
 VG="optiplex"
-TOT_STATE=14
+TOT_STATE=16
 CUR_STATE=1
 while getopts “hn:s:i:” OPTION
 do
@@ -127,6 +127,7 @@ next $?
 # local loop configuration
 # ipv6 configuration
 #
+# FIXME : does not work at all
 echo "$CUR_STATE/$TOT_STATE - Configure the network"
 if [ $IP ]
 then
@@ -175,8 +176,12 @@ bootloader = "pygrub"
 EOF
 next $?
 
+echo "$CUR_STATE/$TOT_STATE - Creating the new VM"
+xm new $CONFIG_PATH/$NAME.cfg
+next $?
+
 echo "$CUR_STATE/$TOT_STATE - Starting the new VM"
-xm create $CONFIG_PATH/$NAME.cfg
+xm start $NAME
 next $?
 
 echo "--- The END ---"
